@@ -68,15 +68,16 @@ namespace SimplexAlgorithm
         /// <returns></returns>
         public Equation Resolve(Equation equation)
         {
-            var coefficient = 0d;
             var fac = this[equation.LeftTerm];
 
             var vars = new VariableFactor[equation.Factors.Length];
 
             for (var i = 0; i < vars.Length; i++)
             {
-                vars[i] = (equation[i] * fac) + this[i].Factor;
+                vars[i] = (equation[i] * fac) + this[equation[i].Variable];
             }
+
+            var coefficient = Coefficient + equation.Coefficient*fac;
 
             return new Equation(LeftTerm, vars, coefficient);
         }
@@ -101,6 +102,10 @@ namespace SimplexAlgorithm
 
                     sb.Append("*");
                 }
+                else if(i == 0 && f.Factor < 0)
+                {
+                    sb.Append("-");
+                }
                 sb.Append(f.Variable);
             }
 
@@ -108,6 +113,36 @@ namespace SimplexAlgorithm
             sb.Append(Math.Abs(Coefficient));
 
             return sb.ToString();
+        }
+
+        public static bool operator ==(Equation e1, Equation e2)
+        {
+            return e1.LeftTerm == e2.LeftTerm 
+                && Math.Abs(e1.Coefficient - e2.Coefficient) <= double.Epsilon;
+        }
+
+        public static bool operator !=(Equation e1, Equation e2)
+        {
+            return !(e1 == e2);
+        }
+
+        public bool Equals(Equation other) => this == other;
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            return obj is Equation && Equals((Equation)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = LeftTerm.GetHashCode();
+                hashCode = (hashCode * 397) ^ (Factors?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ Coefficient.GetHashCode();
+                return hashCode;
+            }
         }
     }
 }

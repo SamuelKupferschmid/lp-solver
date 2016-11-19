@@ -48,7 +48,7 @@ namespace SimplexAlgorithm
                 }
                 else
                 {
-                    equations[i] = t[i].Resolve(pEq);
+                     equations[i] = t[i].Resolve(pEq);
                 }
             }
 

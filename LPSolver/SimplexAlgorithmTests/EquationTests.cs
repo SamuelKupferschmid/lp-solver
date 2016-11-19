@@ -51,18 +51,22 @@ namespace SimplexAlgorithmTests
         {
             var e1 = new Equation(Variable.Slack(2), new[]
             {
-                new VariableFactor(Variable.Problem(1),40 ),
-                new VariableFactor(Variable.Problem(2),-80)
-            }, 80);
+                new VariableFactor(Variable.Problem(1),-40),
+                new VariableFactor(Variable.Problem(2),-120)
+            }, 2400);
             var e2 = new Equation(Variable.Problem(1), new[]
             {
                 new VariableFactor(Variable.Slack(1),-1 ),
                 new VariableFactor(Variable.Problem(2),-1)
             }, 40);
 
-            var r = e1.Resolve(e2);
+            var r = new Equation(Variable.Slack(2), new[]
+            {
+                new VariableFactor(Variable.Slack(1),40 ),
+                new VariableFactor(Variable.Problem(2),-80)
+            }, 800);
 
-            Assert.AreEqual(e1.LeftTerm, r.LeftTerm);
+            Assert.AreEqual(r, e1.Resolve(e2));
         }
 
         [TestMethod]
