@@ -29,9 +29,9 @@ namespace SimplexAlgorithm
 
             var format = "{0," + ColWidth + "}";
 
-            foreach (var v in Equations[0].SummandVariables)
+            foreach (var v in Equations[0].Factors)
             {
-                sb.AppendFormat(format, v);
+                sb.AppendFormat(format, v.Variable);
             }
 
             sb.AppendFormat(format, "c");
@@ -41,7 +41,7 @@ namespace SimplexAlgorithm
             foreach (var eq in Equations.OrderBy(e=>e.LeftTerm.Type))
             {
                 sb.AppendFormat(format, eq.LeftTerm);
-                foreach (var val in eq.SummandValues)
+                foreach (var val in eq.Factors)
                 {
                     sb.AppendFormat(format, val);
                 }
@@ -61,13 +61,13 @@ namespace SimplexAlgorithm
             var minVal = double.MaxValue;
             var minIndex = -1;
 
-            var target = TargetEquation;
+            var facs = TargetEquation;
 
-            for (int i = 0; i < target.SummandValues.Length; i++)
+            for (int i = 0; i < facs.Factors.Length; i++)
             {
-                if (target.SummandValues[i] > 0 && target.SummandValues[i] < minVal)
+                if (facs[i].Factor > 0 && facs[i].Factor < minVal)
                 {
-                    minVal = target.SummandValues[i];
+                    minVal = facs[i].Factor;
                     minIndex = i;
                 }
             }
@@ -75,7 +75,7 @@ namespace SimplexAlgorithm
             if (minIndex == -1)
                 return false;
 
-            head = target.SummandVariables[minIndex];
+            head = facs[minIndex].Variable;
 
             minVal = double.MaxValue;
 

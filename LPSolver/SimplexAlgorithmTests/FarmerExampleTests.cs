@@ -17,26 +17,26 @@ namespace SimplexAlgorithmTests
         {
             _y1 = new Equation(Variable.Slack(1), new[]
                {
-                new Tuple<Variable, double>(Variable.Problem(1),-1),
-                new Tuple<Variable, double>(Variable.Problem(2),-1),
+                new VariableFactor(Variable.Problem(1),-1),
+                new VariableFactor(Variable.Problem(2),-1),
             }, 40);
 
             _y2 = new Equation(Variable.Slack(2), new[]
                {
-                new Tuple<Variable, double>(Variable.Problem(1),-40),
-                new Tuple<Variable, double>(Variable.Problem(2),-120),
+                new VariableFactor(Variable.Problem(1),-40),
+                new VariableFactor(Variable.Problem(2),-120),
             }, 2400);
 
             _y3 = new Equation(Variable.Slack(3), new[]
                {
-                new Tuple<Variable, double>(Variable.Problem(1),-7),
-                new Tuple<Variable, double>(Variable.Problem(2),-12),
+                new VariableFactor(Variable.Problem(1),-7),
+                new VariableFactor(Variable.Problem(2),-12),
             }, 312);
 
             _z = new Equation(Variable.Target(1), new[]
                {
-                new Tuple<Variable, double>(Variable.Problem(1),100),
-                new Tuple<Variable, double>(Variable.Problem(2),250),
+                new VariableFactor(Variable.Problem(1),100),
+                new VariableFactor(Variable.Problem(2),250),
             }, 0);
         }
 

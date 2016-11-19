@@ -9,60 +9,76 @@ namespace SimplexAlgorithm
     public struct Equation
     {
         public readonly Variable LeftTerm;
-        public readonly Variable[] SummandVariables;
-        public readonly double[] SummandValues;
+        public readonly VariableFactor[] Factors;
         public readonly double Coefficient;
 
         /// <summary>
         /// A minimal Equation used for solving the SimplexAlgorithm
-        /// </summary>
-        /// <param name="leftTerm">A Variable used as left Term</param>
-        /// <param name="summands">An Array of Variable double Tuples</param>
-        /// <param name="coefficient"></param>
-        public Equation(Variable leftTerm, Tuple<Variable,double>[] summands, double coefficient)
+        /// </summary
+        public Equation(Variable leftTerm, VariableFactor[] factors, double coefficient)
         {
-            LeftTerm = leftTerm;
-            var l = summands.Count();
-            SummandVariables = new Variable[l];
-            SummandValues = new double[l];
+            if(factors.Select(f=>f.Variable).Distinct().Count() < factors.Length)
+                throw  new InvalidOperationException("There are duplicated variables");
 
-            int i = 0;
-            foreach (var s in summands)
-            {
-                SummandVariables[i] = s.Item1;
-                SummandValues[i++] = s.Item2;
-            }
+            LeftTerm = leftTerm;
+            Factors = new VariableFactor[factors.Length];
+            Array.Copy(factors, Factors, factors.Length);
 
             Coefficient = coefficient;
         }
 
-        public double Value(Variable v)
+        public double this[Variable index] => (from f in Factors where f.Variable == index select f.Factor).FirstOrDefault();
+        public VariableFactor this[int index] => Factors[index];
+
+        public int IndexOf(Variable v)
         {
-            for (var i = 0; i < SummandVariables.Length; i++)
+            for (int i = 0; i < Factors.Length; i++)
             {
-                if (SummandVariables[i] == v)
-                    return SummandValues[i];
+                if (Factors[i].Variable == v)
+                    return i;
             }
 
-            throw new ArgumentOutOfRangeException();
+            return -1;
         }
 
-        public double Ration(Variable problem) => Math.Abs(Coefficient/Value(problem));
+        public double Ration(Variable problem) => Math.Abs(Coefficient / this[problem]);
 
         public Equation Switch(Variable leftTerm)
         {
-            var baseFactor = (-1)/Value(leftTerm);
+            var baseFac = (-1) / this[leftTerm];
 
-            var summands = new List<Tuple<Variable, double>> {new Tuple<Variable, double>(LeftTerm, -baseFactor)};
+            var factors = new VariableFactor[Factors.Length];
+            var si = IndexOf(leftTerm);
+            factors[si] = new VariableFactor(LeftTerm, -baseFac);
 
-
-            for (int i = 0; i < SummandVariables.Length; i++)
+            for (var i = 0; i < Factors.Length; i++)
             {
-                if(SummandVariables[i] != leftTerm)
-                    summands.Add(new Tuple<Variable, double>(SummandVariables[i],SummandValues[i]  * baseFactor));
+                if (i != si)
+                    factors[i] = Factors[i] * baseFac;
             }
 
-            return new Equation(leftTerm,summands.ToArray(),Coefficient * baseFactor);
+            return new Equation(leftTerm, factors, Coefficient * baseFac);
+        }
+
+
+        /// <summary>
+        /// Returns an Equation which has applied the given Equation to the current Equation. The LeftTerm is equal to the current.
+        /// </summary>
+        /// <param name="equation">An Equation whith a LeftTerm Variable that exists in the current Equation Summands</param>
+        /// <returns></returns>
+        public Equation Resolve(Equation equation)
+        {
+            var coefficient = 0d;
+            var fac = this[equation.LeftTerm];
+
+            var vars = new VariableFactor[equation.Factors.Length];
+
+            for (var i = 0; i < vars.Length; i++)
+            {
+                vars[i] = (equation[i] * fac) + this[i].Factor;
+            }
+
+            return new Equation(LeftTerm, vars, coefficient);
         }
     }
 }
