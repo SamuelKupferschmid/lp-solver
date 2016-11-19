@@ -18,5 +18,20 @@ namespace SimplexAlgorithmTests
 
             Assert.AreEqual(10, e.Ration(Variable.Problem(5)), double.Epsilon);
         }
+
+        [TestMethod]
+        public void SwitchTerm()
+        {
+            var e = new Equation(Variable.Slack(1), new []
+            {
+                new Tuple<Variable, double>(Variable.Problem(1),-1 ),
+                new Tuple<Variable, double>(Variable.Problem(1), -1)  
+            },40);
+
+            var e2 = e.Switch(Variable.Problem(1));
+
+            Assert.AreEqual(Variable.Problem(1),e2.LeftTerm);
+            Assert.AreEqual(-1,e2.Value(Variable.Slack(1)));
+        }
     }
 }
