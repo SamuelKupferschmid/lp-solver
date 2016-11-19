@@ -48,5 +48,14 @@ namespace SimplexAlgorithmTests
             Variable row;
             Assert.IsTrue(t.FindPivot(out head, out row));
         }
+
+        [TestMethod]
+        public void NextTableau()
+        {
+            var t1 = new Tableau(new[] { _y1, _y2, _y3, _z });
+            t1.Print();
+            var t2 = Solver.NextTableau(t1);
+            t2.Print();
+        }
     }
 }

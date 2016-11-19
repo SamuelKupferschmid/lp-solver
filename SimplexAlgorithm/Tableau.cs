@@ -21,6 +21,20 @@ namespace SimplexAlgorithm
 
         private const int ColWidth = 6;
 
+        public Equation this[Variable index] => (from e in Equations where e.LeftTerm == index select e).FirstOrDefault();
+        public Equation this[int index] => Equations[index];
+
+        public int IndexOf(Variable v)
+        {
+            for (int i = 0; i < Equations.Length; i++)
+            {
+                if (Equations[i].LeftTerm == v)
+                    return i;
+            }
+
+            return -1;
+        }
+
         public void Print()
         {
             StringBuilder sb = new StringBuilder();

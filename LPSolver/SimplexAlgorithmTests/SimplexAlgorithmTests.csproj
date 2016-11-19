@@ -57,12 +57,33 @@
     <Compile Include="EquationTests.cs" />
     <Compile Include="TableauTests.cs" />
     <Compile Include="FarmerExampleTests.cs" />
+    <Compile Include="ExamplesTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\SimplexAlgorithm\SimplexAlgorithm.csproj">
       <Project>{16F01EB4-B9E3-44D8-BE17-399706DD154B}</Project>
       <Name>SimplexAlgorithm</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Examples\BasicExample.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Examples\InfiniteSolutions.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Examples\NegSchlupf.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Examples\NichtNegativitaet_1.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Examples\NichtNegativitaet_2.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Examples\ZweiSaefte.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

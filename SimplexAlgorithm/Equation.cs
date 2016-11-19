@@ -17,8 +17,8 @@ namespace SimplexAlgorithm
         /// </summary
         public Equation(Variable leftTerm, VariableFactor[] factors, double coefficient)
         {
-            if(factors.Select(f=>f.Variable).Distinct().Count() < factors.Length)
-                throw  new InvalidOperationException("There are duplicated variables");
+            if (factors.Select(f => f.Variable).Distinct().Count() < factors.Length)
+                throw new InvalidOperationException("There are duplicated variables");
 
             LeftTerm = leftTerm;
             Factors = new VariableFactor[factors.Length];
@@ -79,6 +79,35 @@ namespace SimplexAlgorithm
             }
 
             return new Equation(LeftTerm, vars, coefficient);
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+
+            sb.Append(LeftTerm);
+            sb.Append(" = ");
+
+            for (int i = 0; i < Factors.Length; i++)
+            {
+                var f = Factors[i];
+
+                if (i > 0)
+                    sb.Append(f.Factor > 0 ? " + " : " - ");
+
+                if (Math.Abs(Math.Abs(f.Factor) - 1) > double.Epsilon)
+                {
+                    sb.Append(i > 0 ? Math.Abs(f.Factor) : f.Factor);
+
+                    sb.Append("*");
+                }
+                sb.Append(f.Variable);
+            }
+
+            sb.Append(Coefficient > 0 ? " + " : " - ");
+            sb.Append(Math.Abs(Coefficient));
+
+            return sb.ToString();
         }
     }
 }

@@ -75,5 +75,29 @@ namespace SimplexAlgorithmTests
                 new VariableFactor(Variable.Slack(3),3) 
             }, 200 );
         }
+
+        [TestMethod]
+        public void ToStringPrettyPrint()
+        {
+            var e = new Equation(Variable.Problem(0), new[]
+            {
+                new VariableFactor(Variable.Slack(3),34),
+                new VariableFactor(Variable.Slack(4),3)
+            }, 200);
+
+            Assert.AreEqual("x0 = 34*y3 + 3*y4 + 200",e.ToString());
+        }
+
+        [TestMethod]
+        public void ToStringHideFactor1()
+        {
+            var e = new Equation(Variable.Problem(0), new[]
+            {
+                new VariableFactor(Variable.Slack(3),1),
+                new VariableFactor(Variable.Slack(4),-1)
+            }, 200);
+
+            Assert.AreEqual("x0 = y3 - y4 + 200", e.ToString());
+        }
     }
 }
