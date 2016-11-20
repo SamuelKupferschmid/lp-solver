@@ -19,9 +19,9 @@ namespace SimplexAlgorithm
 
         public static Variable Slack(int index) => new Variable(VariableType.Slack, index);
         public static Variable Problem (int index) => new Variable(VariableType.Problem, index);
-        public static Variable Target (int index) => new Variable(VariableType.Target, index);
+        public static Variable Target () => new Variable(VariableType.Target, 0);
 
-        public static bool operator ==(Variable v1, Variable v2) => v1.Type == v2.Type && v1.Index == v2.Index;
+        public static bool operator ==(Variable v1, Variable v2) => v1.Type == v2.Type && (v1.Index == v2.Index || v1.Type == VariableType.Target);
         public static bool operator !=(Variable v1, Variable v2) => !(v1 == v2);
 
         public override string ToString()

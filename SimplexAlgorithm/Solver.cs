@@ -22,21 +22,23 @@ namespace SimplexAlgorithm
         {
             var tableau = new Tableau(_equations);
 
-
-            ResultFactors = null;
-            Equations = null;
-            return ResultType.OneResult;
-        }
-
-        public static Tableau NextTableau(Tableau t)
-        {
             Variable head;
             Variable row;
 
-            t.FindPivot(out head, out row);
+            while (tableau.FindPivot(out head, out row))
+            {
+                tableau = NextTableau(tableau, head, row);
+            }
 
-            var pIndex = t.IndexOf(row);
-            var pEq = t[row].Switch(head);
+            ResultFactors = (from e in tableau.Equations where e.LeftTerm.Type != VariableType.Slack select new VariableFactor(e.LeftTerm, e.Coefficient)).ToArray();
+
+            return ResultType.OneResult;
+        }
+
+        public static Tableau NextTableau(Tableau t, Variable pHead, Variable pRow)
+        {
+            var pIndex = t.IndexOf(pRow);
+            var pEq = t[pRow].Switch(pHead);
 
             var equations = new Equation[t.Equations.Length];
 

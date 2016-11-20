@@ -24,5 +24,7 @@ namespace SimplexAlgorithm
         public static bool operator ==(VariableFactor f1, VariableFactor f2)
             => f1.Variable == f2.Variable && f1.Factor - f2.Factor < double.Epsilon;
         public static bool operator !=(VariableFactor f1, VariableFactor f2) => !(f1 == f2);
+
+        public override string ToString() => Factor + "*" + Variable.ToString();
     }
 }
