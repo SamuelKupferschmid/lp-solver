@@ -14,6 +14,9 @@ namespace SimplexAlgorithm
 
         public Tableau(Equation[] equations)
         {
+            if(equations == null)
+                throw new ArgumentNullException(nameof(equations));
+
             Equations = equations;
         }
 

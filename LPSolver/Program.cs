@@ -12,10 +12,21 @@ namespace myLP
     {
         static void Main(string[] args)
         {
-            var cells = File.ReadLines(args[0]).Select(l=>l.Split(';')).ToArray();
+            var filename = args?[0];
 
-            var vars = new Variable[int.Parse(cells[0][1])];
-            var conditons = new Equation[int.Parse(cells[0][1])];
+            if (filename == null)
+            {
+                Console.WriteLine("1 argument with the filename expected.");
+                return;
+            }
+            else if (!File.Exists(filename))
+            {
+                Console.WriteLine("File '%s' don't exist");
+                return;
+            }
+
+            var solver = new Solver(filename);
+            var result = solver.Solve();
 
         }
     }

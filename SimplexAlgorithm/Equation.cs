@@ -77,7 +77,7 @@ namespace SimplexAlgorithm
                 vars[i] = (equation[i] * fac) + this[equation[i].Variable];
             }
 
-            var coefficient = Coefficient + equation.Coefficient*fac;
+            var coefficient = Coefficient + equation.Coefficient * fac;
 
             return new Equation(LeftTerm, vars, coefficient);
         }
@@ -89,35 +89,40 @@ namespace SimplexAlgorithm
             sb.Append(LeftTerm);
             sb.Append(" = ");
 
-            for (int i = 0; i < Factors.Length; i++)
+            if (Factors != null)
             {
-                var f = Factors[i];
-
-                if (i > 0)
-                    sb.Append(f.Factor > 0 ? " + " : " - ");
-
-                if (Math.Abs(Math.Abs(f.Factor) - 1) > double.Epsilon)
+                for (int i = 0; i < Factors.Length; i++)
                 {
-                    sb.Append(i > 0 ? Math.Abs(f.Factor) : f.Factor);
+                    var f = Factors[i];
 
-                    sb.Append("*");
+                    if (i > 0)
+                        sb.Append(f.Factor >= 0 ? " + " : " - ");
+
+                    if (Math.Abs(Math.Abs(f.Factor) - 1) > double.Epsilon)
+                    {
+                        sb.Append(i > 0 ? Math.Abs(f.Factor) : f.Factor);
+
+                        sb.Append("*");
+                    }
+                    else if (i == 0 && f.Factor < 0)
+                    {
+                        sb.Append("-");
+                    }
+                    sb.Append(f.Variable);
                 }
-                else if(i == 0 && f.Factor < 0)
-                {
-                    sb.Append("-");
-                }
-                sb.Append(f.Variable);
             }
 
-            sb.Append(Coefficient > 0 ? " + " : " - ");
-            sb.Append(Math.Abs(Coefficient));
+            if (Factors == null || Factors.Length == 0)
+                sb.Append(" " + Coefficient);
+            else
+                sb.Append((Coefficient >= 0 ? " + " : " - ") + Math.Abs(Coefficient));
 
             return sb.ToString();
         }
 
         public static bool operator ==(Equation e1, Equation e2)
         {
-            return e1.LeftTerm == e2.LeftTerm 
+            return e1.LeftTerm == e2.LeftTerm
                 && Math.Abs(e1.Coefficient - e2.Coefficient) <= double.Epsilon;
         }
 
