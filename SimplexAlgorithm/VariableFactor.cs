@@ -25,6 +25,25 @@ namespace SimplexAlgorithm
             => f1.Variable == f2.Variable && f1.Factor - f2.Factor < double.Epsilon;
         public static bool operator !=(VariableFactor f1, VariableFactor f2) => !(f1 == f2);
 
+        public bool Equals(VariableFactor other)
+        {
+            return Variable.Equals(other.Variable) && Factor.Equals(other.Factor);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            return obj is VariableFactor && Equals((VariableFactor)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Variable.GetHashCode() * 397) ^ Factor.GetHashCode();
+            }
+        }
+
         public override string ToString() => Factor + "*" + Variable.ToString();
     }
 }

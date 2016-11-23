@@ -57,7 +57,6 @@ namespace SimplexAlgorithmTests
             Variable row;
 
             var t1 = new Tableau(new[] { _y1, _y2, _y3, _z });
-            t1.Print();
             t1.FindPivot(out head, out row);
             var t2 = Solver.NextTableau(t1, head, row);
             Assert.AreEqual(4000,t2.TargetEquation.Coefficient);

@@ -24,6 +24,25 @@ namespace SimplexAlgorithm
         public static bool operator ==(Variable v1, Variable v2) => v1.Type == v2.Type && (v1.Index == v2.Index || v1.Type == VariableType.Target);
         public static bool operator !=(Variable v1, Variable v2) => !(v1 == v2);
 
+        public bool Equals(Variable other)
+        {
+            return Index == other.Index && Type == other.Type;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            return obj is Variable && Equals((Variable)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Index * 397) ^ (int)Type;
+            }
+        }
+
         public override string ToString()
         {
             if (Type == VariableType.Target)

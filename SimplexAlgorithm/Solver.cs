@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,8 +13,12 @@ namespace SimplexAlgorithm
         private readonly Equation[] _equations;
 
         public Solver(string filename)
+            : this(File.OpenText(filename))
+        { }
+
+        public Solver(StreamReader reader)
         {
-            var cells = File.ReadAllLines(filename).Select(l => l.Split(';')).ToArray();
+            var cells = ReadAllLines(reader).Select(l => l.Split(';')).ToArray();
 
             var vCnt = int.Parse(cells[0][0]);
             var cCnt = int.Parse(cells[0][1]);
@@ -21,43 +26,72 @@ namespace SimplexAlgorithm
             var pVars = new Variable[vCnt];
             var sVars = new Variable[cCnt];
 
-            for(int i = 0; i < pVars.Length;i++)
-                pVars[i] = Variable.Problem(i+1);
+            for (var i = 0; i < pVars.Length; i++)
+                pVars[i] = Variable.Problem(i + 1);
 
-            var eqs = new Equation[cCnt + 1];
+            var eqs = new List<Equation>();
 
             for (var i = 0; i < cCnt; i++)
             {
-                var facs = new VariableFactor[vCnt];
-                for (var j = 0; j < vCnt; j++)
-                {
-                    facs[j] = new VariableFactor(pVars[j],double.Parse(cells[i + 3][j + 1]));
-                }
+                var op = cells[i + 3][0];
+                var fCells = cells[i + 3].Skip(1).ToArray();
 
-                eqs[i] = new Equation(Variable.Slack(i+1),facs, double.Parse(cells[i + 3][vCnt + 1]));
+                if (op == "<=" || op == "=")
+                    eqs.Add(new Equation(Variable.Slack(i + 1), GetFactorsByLine(pVars,fCells,true), double.Parse(cells[i + 3][vCnt + 1])));
+
+                if (op == ">=" || op == "=")
+                    eqs.Add(new Equation(Variable.Slack(i + 1), GetFactorsByLine(pVars,fCells,false), double.Parse(cells[i + 3][vCnt + 1])));
+
             }
 
             //target function
             var tFactors = new VariableFactor[vCnt];
 
-            for (int i = 0; i < tFactors.Length; i++)
+            for (var i = 0; i < tFactors.Length; i++)
             {
-                tFactors[i] = new VariableFactor(pVars[i],double.Parse(cells[1][i+1]));
+                tFactors[i] = new VariableFactor(pVars[i], double.Parse(cells[1][i + 1]));
             }
 
             var target = new Equation(Variable.Target(), tFactors, 0);
 
-            eqs[eqs.Length - 1] = target;
+            eqs.Add(target);
 
-            _equations = eqs;
+            _equations = eqs.ToArray();
         }
+
+        private VariableFactor[] GetFactorsByLine(Variable[] vars, string[] fCells, bool negate)
+        {
+            var f = new VariableFactor[vars.Length];
+
+            for (var i = 0; i < f.Length; i++)
+            {
+                var val = double.Parse(fCells[i]);
+
+                if (negate)
+                    val = 0 - val;
+
+                f[i] = new VariableFactor(vars[i], val);
+            }
+
+            return f;
+        }
+
+        public IEnumerable<Equation> Equations => _equations.AsEnumerable();
 
         public Solver(Equation[] equations)
         {
             _equations = equations;
         }
 
-        public Equation[] Equations { get; private set; }
+        public IEnumerable<string> ReadAllLines(StreamReader reader)
+        {
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                yield return line;
+            }
+        }
+
         public VariableFactor[] ResultFactors { get; private set; }
 
         public ResultType Solve()
@@ -70,7 +104,7 @@ namespace SimplexAlgorithm
 
             while (tableau.FindPivot(out head, out row))
             {
-                if(watchdog-- <= 0)
+                if (watchdog-- <= 0)
                     throw new Exception();
                 tableau = NextTableau(tableau, head, row);
             }
@@ -95,7 +129,7 @@ namespace SimplexAlgorithm
                 }
                 else
                 {
-                     equations[i] = t[i].Resolve(pEq);
+                    equations[i] = t[i].Resolve(pEq);
                 }
             }
 

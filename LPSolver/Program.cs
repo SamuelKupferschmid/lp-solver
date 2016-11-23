@@ -28,6 +28,18 @@ namespace myLP
             var solver = new Solver(filename);
             var result = solver.Solve();
 
+            switch (result)
+            {
+                case Solver.ResultType.NoResults:
+                    Console.WriteLine("No result found.");
+                    break;
+                case Solver.ResultType.OneResult:
+                    Console.WriteLine("One result found.");
+                    break;
+                case Solver.ResultType.InfinitResults:
+                    Console.WriteLine("Infinit results found.");
+                    break;
+            }
         }
     }
 }

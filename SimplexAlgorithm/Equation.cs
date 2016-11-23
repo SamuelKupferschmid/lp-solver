@@ -122,6 +122,12 @@ namespace SimplexAlgorithm
 
         public static bool operator ==(Equation e1, Equation e2)
         {
+            if (e1.Factors.Length != e2.Factors.Length)
+                return false;
+
+            if (e1.Factors.Any(f => Math.Abs(f.Factor - e2[f.Variable]) >= double.Epsilon))
+                return false;
+
             return e1.LeftTerm == e2.LeftTerm
                 && Math.Abs(e1.Coefficient - e2.Coefficient) <= double.Epsilon;
         }

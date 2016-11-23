@@ -103,5 +103,13 @@ namespace SimplexAlgorithmTests
 
             Assert.AreEqual("x0 = y3 - y4 + 200", e.ToString());
         }
+
+        [TestMethod]
+        public void EqualsCompareVariables()
+        {
+            var eq1 = new Equation(Variable.Slack(1), new[]{new VariableFactor(Variable.Problem(1), -2)}, 100);
+            var eq2 = new Equation(Variable.Slack(1), new[]{new VariableFactor(Variable.Problem(1), 2)}, 100);
+            Assert.AreNotEqual(eq1,eq2);
+        }
     }
 }

@@ -60,12 +60,6 @@
     <Compile Include="ExamplesTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\SimplexAlgorithm\SimplexAlgorithm.csproj">
-      <Project>{16F01EB4-B9E3-44D8-BE17-399706DD154B}</Project>
-      <Name>SimplexAlgorithm</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Examples\BasicExample.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -84,6 +78,12 @@
     <None Include="Examples\ZweiSaefte.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SimplexAlgorithm\SimplexAlgorithm.csproj">
+      <Project>{16f01eb4-b9e3-44d8-be17-399706dd154b}</Project>
+      <Name>SimplexAlgorithm</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
