@@ -38,38 +38,6 @@ namespace SimplexAlgorithm
             return -1;
         }
 
-        public void Print()
-        {
-            StringBuilder sb = new StringBuilder();
-
-            sb.Append(new string(' ', ColWidth));
-
-            var format = "{0," + ColWidth + "}";
-
-            foreach (var v in Equations[0].Factors)
-            {
-                sb.AppendFormat(format, v.Variable);
-            }
-
-            sb.AppendFormat(format, "c");
-
-            sb.AppendLine(null);
-
-            foreach (var eq in Equations.OrderBy(e=>e.LeftTerm.Type))
-            {
-                sb.AppendFormat(format, eq.LeftTerm);
-                foreach (var val in eq.Factors)
-                {
-                    sb.AppendFormat(format, val);
-                }
-
-                sb.AppendFormat(format, eq.Coefficient);
-                sb.AppendLine(null);
-            }
-
-            Console.WriteLine(sb);
-        }
-
         public bool FindPivot(out Variable head, out Variable row)
         {
             head = default(Variable);
@@ -108,6 +76,38 @@ namespace SimplexAlgorithm
             }
 
             return true;
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+
+            sb.Append(new string(' ', ColWidth));
+
+            var format = "{0," + ColWidth + "}";
+
+            foreach (var v in Equations[0].Factors)
+            {
+                sb.AppendFormat(format, v.Variable);
+            }
+
+            sb.AppendFormat(format, "c");
+
+            sb.AppendLine(null);
+
+            foreach (var eq in Equations.OrderBy(e => e.LeftTerm.Type))
+            {
+                sb.AppendFormat(format, eq.LeftTerm);
+                foreach (var val in eq.Factors)
+                {
+                    sb.AppendFormat(format, val);
+                }
+
+                sb.AppendFormat(format, eq.Coefficient);
+                sb.AppendLine(null);
+            }
+
+            return sb.ToString();
         }
     }
 }
