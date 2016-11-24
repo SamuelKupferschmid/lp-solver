@@ -100,17 +100,26 @@ namespace SimplexAlgorithm
 
             Variable head;
             Variable row;
-            int watchdog = 100;
+            List<Equation> targetHistory = new List<Equation>();
+            var isCircular = false;
 
             while (tableau.FindPivot(out head, out row))
             {
-                if (watchdog-- <= 0)
-                    throw new Exception();
                 tableau = NextTableau(tableau, head, row);
+
+                //check cycles
+                if (targetHistory.Contains(tableau.TargetEquation))
+                {
+                    isCircular = true;
+                    break;
+                }
+                targetHistory.Add(tableau.TargetEquation);
             }
 
             ResultFactors = (from e in tableau.Equations where e.LeftTerm.Type != VariableType.Slack select new VariableFactor(e.LeftTerm, e.Coefficient)).ToArray();
 
+            if(isCircular)
+                return ResultType.InfinitResults;
             return ResultType.OneResult;
         }
 

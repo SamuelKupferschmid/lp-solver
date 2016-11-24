@@ -11,8 +11,8 @@ namespace SimplexAlgorithmTests
         {
             var cond = new Equation(Variable.Slack(1), new []
             {
-                new VariableFactor(Variable.Problem(1),2),
-                new VariableFactor(Variable.Problem(2),1)  
+                new VariableFactor(Variable.Problem(1), 2),
+                new VariableFactor(Variable.Problem(2), 1)  
             },40);
             var target = new Equation(Variable.Target(), new[]
             {
