@@ -41,6 +41,27 @@ namespace SimplexAlgorithm
             return -1;
         }
 
+        /// <summary>
+        /// returns a copy of Equation with the given additional VariableFactor 
+        /// </summary>
+        /// <param name="vf"></param>
+        /// <returns></returns>
+        public Equation AddFactor(VariableFactor vf)
+        {
+            var factors = new VariableFactor[this.Factors.Length + 1];
+
+            Array.Copy(Factors,0,factors,1,Factors.Length);
+            factors[0] = vf;
+
+            return new Equation(LeftTerm,factors,Coefficient);
+        }
+
+        public Equation RemoveFactor(Variable v)
+        {
+            var factors = Factors.Where(f => f.Variable != v).ToArray();
+            return new Equation(LeftTerm, factors, Coefficient);
+        }
+
         public double Ration(Variable problem) => Math.Abs(Coefficient / this[problem]);
 
         public Equation Switch(Variable leftTerm)

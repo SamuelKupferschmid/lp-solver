@@ -37,22 +37,32 @@ namespace SimplexAlgorithm
                 var fCells = cells[i + 3].Skip(1).ToArray();
 
                 if (op == "<=" || op == "=")
-                    eqs.Add(new Equation(Variable.Slack(i + 1), GetFactorsByLine(pVars,fCells,true), double.Parse(cells[i + 3][vCnt + 1])));
+                    eqs.Add(new Equation(Variable.Slack(i + 1), GetFactorsByLine(pVars, fCells, true), double.Parse(cells[i + 3][vCnt + 1])));
 
                 if (op == ">=" || op == "=")
-                    eqs.Add(new Equation(Variable.Slack(i + 1), GetFactorsByLine(pVars,fCells,false), double.Parse(cells[i + 3][vCnt + 1])));
+                    eqs.Add(new Equation(Variable.Slack(i + 1), GetFactorsByLine(pVars, fCells, false), double.Parse(cells[i + 3][vCnt + 1])));
 
             }
 
             //target function
             var tFactors = new VariableFactor[vCnt];
+            var minimize = cells[1][0].Contains("min");
 
             for (var i = 0; i < tFactors.Length; i++)
             {
-                tFactors[i] = new VariableFactor(pVars[i], double.Parse(cells[1][i + 1]));
-            }
+                var val = double.Parse(cells[1][i + 1]);
 
-            var target = new Equation(Variable.Target(), tFactors, 0);
+                if (minimize)
+                    val = -val;
+
+                tFactors[i] = new VariableFactor(pVars[i], val);
+            }
+            var targetVal = double.Parse(cells[1][vCnt + 1]);
+
+            if (minimize)
+                targetVal = -targetVal;
+
+            var target = new Equation(Variable.Target(), tFactors, targetVal);
 
             eqs.Add(target);
 
@@ -98,30 +108,84 @@ namespace SimplexAlgorithm
         {
             var tableau = new Tableau(_equations);
 
+            tableau = PreprocessTableau(tableau);
+
+            return SolveTableau(ref tableau);
+        }
+
+        private Tableau PreprocessTableau(Tableau t)
+        {
+            //check if there is no need to preprocess the table
+            if (t.Equations.All(e => e.LeftTerm.Type == VariableType.Target || e.Coefficient >= 0))
+                return t;
+
+            var eqs = new Equation[t.Equations.Length];
+            var tVar = Variable.Problem(0);
+
+            for (var i = 0; i < eqs.Length - 1; i++)
+                eqs[i] = t.Equations[i].AddFactor(new VariableFactor(tVar, 1));
+
+            var f = new VariableFactor[t.Equations[0].Factors.Length];
+            for (var i = 0; i < f.Length; i++)
+            {
+                f[i] = new VariableFactor(t.Equations[0].Factors[i].Variable,0);
+            }
+
+            var target = new Equation(Variable.Target(), f, 0);
+            target = target.AddFactor(new VariableFactor(tVar,-1));
+
+            eqs[eqs.Length - 1] = target;
+            t = new Tableau(eqs);
+
+            for (var i = 0; i < eqs.Length; i++)
+            {
+                if (t[i].LeftTerm.Type != VariableType.Target && t[i].Coefficient < 0)
+                    t = NextTableau(t, tVar, t[i].LeftTerm);
+            }
+
+            SolveTableau(ref t);
+
+            var mainEquations = new Equation[t.Equations.Length];
+
+            for (var i = 0; i < mainEquations.Length - 1; i++)
+                mainEquations[i] = t.Equations[i].RemoveFactor(tVar);
+
+            var mainTarget = target.RemoveFactor(tVar);
+
+            mainEquations[mainEquations.Length - 1] = mainTarget;
+            return new Tableau(mainEquations);
+        }
+
+        private ResultType SolveTableau(ref Tableau t)
+        {
             Variable head;
             Variable row;
-            List<Equation> targetHistory = new List<Equation>();
+
+            var prevTargetVal = 0d;
             var isCircular = false;
 
-            while (tableau.FindPivot(out head, out row))
+            while (t.FindPivot(out head, out row))
             {
-                tableau = NextTableau(tableau, head, row);
+                t = NextTableau(t, head, row);
 
                 //check cycles
-                if (targetHistory.Contains(tableau.TargetEquation))
+                if (Math.Abs(t.TargetEquation.Coefficient - prevTargetVal) <= double.Epsilon)
                 {
                     isCircular = true;
                     break;
                 }
-                targetHistory.Add(tableau.TargetEquation);
+
+                prevTargetVal = t.TargetEquation.Coefficient;
             }
 
-            ResultFactors = (from e in tableau.Equations where e.LeftTerm.Type != VariableType.Slack select new VariableFactor(e.LeftTerm, e.Coefficient)).ToArray();
+            ResultFactors = (from e in t.Equations where e.LeftTerm.Type != VariableType.Slack select new VariableFactor(e.LeftTerm, e.Coefficient)).ToArray();
 
-            if(isCircular)
+            if (isCircular)
                 return ResultType.InfinitResults;
             return ResultType.OneResult;
         }
+
+
 
         public static Tableau NextTableau(Tableau t, Variable pHead, Variable pRow)
         {

@@ -111,5 +111,23 @@ namespace SimplexAlgorithmTests
             var eq2 = new Equation(Variable.Slack(1), new[]{new VariableFactor(Variable.Problem(1), 2)}, 100);
             Assert.AreNotEqual(eq1,eq2);
         }
+
+        [TestMethod]
+        public void AddFactor()
+        {
+            var eq1 = new Equation(Variable.Slack(1), new[] { new VariableFactor(Variable.Problem(1), 1) }, 100);
+            var vf = new VariableFactor(new Variable(VariableType.Target, 0),20);
+            var eq2 = new Equation(Variable.Slack(1), new[] { new VariableFactor(Variable.Problem(1), 1), vf }, 100);
+            Assert.AreEqual(eq1.AddFactor(vf), eq2);
+        }
+
+        [TestMethod]
+        public void RemoveFactor()
+        {
+            var vf = new VariableFactor(new Variable(VariableType.Target, 0), 20);
+            var eq1 = new Equation(Variable.Slack(1), new[] { new VariableFactor(Variable.Problem(1), 1), vf }, 100);
+            var eq2 = new Equation(Variable.Slack(1), new[] { new VariableFactor(Variable.Problem(1), 1) }, 100);
+            Assert.AreEqual(eq1.RemoveFactor(vf.Variable), eq2);
+        }
     }
 }
