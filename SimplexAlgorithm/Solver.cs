@@ -115,6 +115,7 @@ namespace SimplexAlgorithm
 
         private Tableau PreprocessTableau(Tableau t)
         {
+            var initialTarget = t.TargetEquation;
             //check if there is no need to preprocess the table
             if (t.Equations.All(e => e.LeftTerm.Type == VariableType.Target || e.Coefficient >= 0))
                 return t;
@@ -147,13 +148,31 @@ namespace SimplexAlgorithm
 
             var mainEquations = new Equation[t.Equations.Length];
 
+
             for (var i = 0; i < mainEquations.Length - 1; i++)
                 mainEquations[i] = t.Equations[i].RemoveFactor(tVar);
 
-            var mainTarget = target.RemoveFactor(tVar);
+            //var newTarget = new Equation(target.LeftTerm,target.Factors,CalculatePreprocessedTargetCoefficient(initialTarget,t))
+            //    .RemoveFactor(tVar);
 
-            mainEquations[mainEquations.Length - 1] = mainTarget;
+            mainEquations[mainEquations.Length - 1] = CalculatePreprocessedMainTarget(initialTarget,t);
             return new Tableau(mainEquations);
+        }
+
+        public static Equation CalculatePreprocessedMainTarget(Equation initialTarget, Tableau preprocessingTableau)
+        {
+            if (Math.Abs(preprocessingTableau.TargetEquation.Coefficient) > double.Epsilon)
+                throw new NotImplementedException();
+
+
+            var resolvedVars =
+                preprocessingTableau.Equations.Where(e => e.LeftTerm.Type == VariableType.Problem)
+                    .Select(e => new Equation(e.LeftTerm, new VariableFactor[0], e.Coefficient)).ToArray();
+
+            for (var i = 0; i < resolvedVars.Length; i++)
+                initialTarget = initialTarget.Resolve(resolvedVars[i]);
+
+            return new Equation(preprocessingTableau.TargetEquation.LeftTerm,preprocessingTableau.TargetEquation.Factors, initialTarget.Coefficient);
         }
 
         private ResultType SolveTableau(ref Tableau t)
