@@ -35,13 +35,6 @@ namespace SimplexAlgorithm
                     cCnt++;
             }
 
-            var nonNegCnt = 0;
-            for (var i = 0; i < vCnt; i++)
-            {
-                if (data[2][i].Contains("true"))
-                    nonNegCnt++;
-            }
-
             Optimization = data[1][0].Contains("max") ? Solver.Optimization.Maximize : Solver.Optimization.Minimize;
 
             TargetVariable = Variable.Target();
@@ -56,7 +49,7 @@ namespace SimplexAlgorithm
             for (var i = 0; i < RowVariables.Length; i++)
                 RowVariables[i] = Variable.Slack(i + 1);
 
-            Matrix = new double[cCnt + nonNegCnt + 1][];
+            Matrix = new double[cCnt + 1][];
 
             var addedInversions = 0;
 
@@ -90,23 +83,12 @@ namespace SimplexAlgorithm
                 }
             }
 
-            var index = cCnt;
-            for(var i = 0; i < vCnt; i++)
-            {
-                if (data[2][i].Contains("true"))
-                {
-                    Matrix[index] = new double[vCnt + 1];
-                    Matrix[index][i] = 1;
-                    index++;
-                }
-            }
-
-            Matrix[cCnt + nonNegCnt] = new double[vCnt + 1];
+            Matrix[cCnt] = new double[vCnt + 1];
 
             for (var i = 0; i <= vCnt; i++)
             {
                 var val = double.Parse(data[1][i + 1]);
-                Matrix[cCnt + nonNegCnt][i] = val;
+                Matrix[cCnt][i] = val;
             }
 
 
