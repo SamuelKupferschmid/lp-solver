@@ -142,5 +142,40 @@ namespace SimplexAlgorithm
 
             return sb.ToString();
         }
+
+        public void DropHeadVariable(Variable var)
+        {
+            var index = -1;
+
+            for (var i = 0; i < HeadVariables.Length; i++)
+            {
+                if (HeadVariables[i] == var)
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            if (index == -1)
+                throw new ArgumentOutOfRangeException(nameof(var));
+
+            var newHeadVars = new Variable[HeadVariables.Length - 1];
+
+            for (var i = 0; i < newHeadVars.Length; i++)
+                newHeadVars[i] = HeadVariables[i < index ? i : (i+1)];
+
+            for (var i = 0; i < Matrix.Length; i++)
+            {
+                var n = new double[newHeadVars.Length + 1];
+
+                for (var j = 0; j <= newHeadVars.Length; j++)
+                    n[j] = Matrix[i][j < index ? j : (j + 1)];
+
+                Matrix[i] = n;
+            }
+
+            CoefficientIndex--;
+            HeadVariables = newHeadVars;
+        }
     }
 }

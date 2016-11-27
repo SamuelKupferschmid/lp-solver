@@ -45,8 +45,6 @@ namespace myLP
                     Console.WriteLine("Infinit results found.");
                     break;
             }
-
-            Console.ReadKey();
         }
     }
 }

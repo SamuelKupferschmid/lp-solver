@@ -7,8 +7,8 @@
     <ProjectGuid>{2960AED5-FFE3-4D49-8F39-026AAF416E9E}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>myLP</RootNamespace>
-    <AssemblyName>myLP</AssemblyName>
+    <RootNamespace>LPSolver</RootNamespace>
+    <AssemblyName>LPSolver</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

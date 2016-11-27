@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "myLP", "myLP.csproj", "{2960AED5-FFE3-4D49-8F39-026AAF416E9E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LPSolver", "LPSolver.csproj", "{2960AED5-FFE3-4D49-8F39-026AAF416E9E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimplexAlgorithm", "..\SimplexAlgorithm\SimplexAlgorithm.csproj", "{16F01EB4-B9E3-44D8-BE17-399706DD154B}"
 EndProject

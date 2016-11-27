@@ -39,7 +39,7 @@ namespace SimplexAlgorithm
             while (tableau.Pivot(out row, out head))
             {
                 if (--watchdog < 0)
-                    throw new Exception();
+                    return new SolverResult(ResultType.InfinitResults, optimization,null,tableau);
                 tableau.Switch(row, head);
             }
 
@@ -53,7 +53,7 @@ namespace SimplexAlgorithm
 
             values.Add(tableau.TargetVariable, tableau.Matrix[tableau.TargetIndex][tableau.CoefficientIndex]);
 
-            return new SolverResult(ResultType.OneResult, optimization, values);
+            return new SolverResult(ResultType.OneResult, optimization, values, tableau);
         }
 
         private static void InvertMinimizeToMaximizeMatrix(double[][] matrix)
@@ -70,6 +70,11 @@ namespace SimplexAlgorithm
         {
             var helpVar = Variable.Problem(0);
             var helpTarget = Variable.Target();
+            var targetIndex = matrix.Length - 1;
+            var mainTarget = matrix[targetIndex];
+            var mainVars = new Variable[headVariables.Length];
+            headVariables.CopyTo(mainVars,0);
+
             headVariables = new[] { helpVar }.Concat(headVariables).ToArray();
 
             for (var i = 0; i < matrix.Length - 1; i++)
@@ -80,8 +85,6 @@ namespace SimplexAlgorithm
                 matrix[i] = newRow;
             }
 
-            var targetIndex = matrix.Length - 1;
-            var mainTarget = matrix[targetIndex];
             matrix[targetIndex] = new double[headVariables.Length + 1];
 
             matrix[targetIndex][0] = -1;
@@ -93,6 +96,47 @@ namespace SimplexAlgorithm
                 if(tableau.Matrix[i][tableau.CoefficientIndex] < 0)
                     tableau.Switch(i, 0);
             }
+
+            var result = InnerSolve(tableau, Optimization.Maximize);
+
+            tableau.DropHeadVariable(helpVar);
+
+            var target = tableau.Matrix[tableau.TargetIndex];
+            for (var i = 0; i < tableau.TargetIndex; i++)
+            {
+                if(tableau.RowVariables[i].Type != VariableType.Problem)
+                    continue;
+
+                var tIndex = -1;
+                var tVal = -1d;
+
+                for (var j = 0; j < mainVars.Length; j++)
+                {
+                    if (mainVars[j] == tableau.RowVariables[i])
+                    {
+                        tIndex = j;
+                        tVal = mainTarget[j];
+                        break;
+                    }
+                }
+
+                for (var j = 0; j < tableau.CoefficientIndex; j++)
+                {
+                    var hVar = tableau.HeadVariables[j];
+                    var vVal = tableau.Matrix[i][j] * tVal;
+
+                    for (var k = 0; k < mainVars.Length; k++)
+                    {
+                        if (mainVars[k] == hVar)
+                            vVal += mainTarget[k];
+                    }
+
+                    target[j] += vVal;
+
+                }
+                target[tableau.CoefficientIndex] += tVal*tableau.Matrix[i][tableau.CoefficientIndex] + mainTarget[mainVars.Length];
+            }
+
 
             return tableau;
         }
@@ -115,12 +159,14 @@ namespace SimplexAlgorithm
             public readonly ResultType Type;
             public readonly Optimization Optimization;
             public readonly Dictionary<Variable, double> Values;
+            public readonly Tableau Tableau;
 
-            protected internal SolverResult(ResultType type, Optimization optimization, Dictionary<Variable, double> values)
+            protected internal SolverResult(ResultType type, Optimization optimization, Dictionary<Variable, double> values, Tableau tableau)
             {
                 Type = type;
                 Optimization = optimization;
                 Values = values;
+                Tableau = tableau;
             }
         }
     }
