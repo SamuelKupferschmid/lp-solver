@@ -9,50 +9,57 @@ namespace SimplexAlgorithm
 {
     public class Tableau
     {
-        public readonly Equation[] Equations;
+        public Variable[] HeadVariables { get; private set; }
+        public Variable[] RowVariables { get; private set; }
+        public Variable TargetVariable { get; private set; }
+        public double[][] Matrix { get; private set; }
+        public int TargetIndex { get; private set; }
+        public int CoefficientIndex { get; private set; }
 
-
-        public Tableau(Equation[] equations)
+        public Tableau(Variable[] headVariables, Variable[] rowVariables, Variable targetVariable, double[][] matrix)
         {
-            if(equations == null)
-                throw new ArgumentNullException(nameof(equations));
+            HeadVariables = headVariables;
+            RowVariables = rowVariables;
+            TargetVariable = targetVariable;
+            Matrix = matrix;
 
-            Equations = equations;
+            TargetIndex = rowVariables.Length;
+            CoefficientIndex = headVariables.Length;
         }
 
-        public Equation TargetEquation => Equations[Equations.Length - 1];
-
-        private const int ColWidth = 6;
-
-        public Equation this[Variable index] => (from e in Equations where e.LeftTerm == index select e).FirstOrDefault();
-        public Equation this[int index] => Equations[index];
-
-        public int IndexOf(Variable v)
+        public Tableau(double[][] matrix)
         {
-            for (int i = 0; i < Equations.Length; i++)
-            {
-                if (Equations[i].LeftTerm == v)
-                    return i;
-            }
+            Matrix = matrix;
 
-            return -1;
+            HeadVariables = new Variable[matrix[0].Length - 1];
+
+            for (var i = 0; i < HeadVariables.Length; i++)
+                HeadVariables[i] = Variable.Problem(i + 1);
+
+            RowVariables = new Variable[matrix.Length - 1];
+
+            for (var i = 0; i < RowVariables.Length; i++)
+                RowVariables[i] = Variable.Slack(i + 1);
+
+            TargetIndex = RowVariables.Length;
+            CoefficientIndex = HeadVariables.Length;
+
+            TargetVariable = Variable.Target();
         }
 
-        public bool FindPivot(out Variable head, out Variable row)
+        public bool Pivot(out int row, out int head)
         {
-            head = default(Variable);
-            row = default(Variable);
+            head = -1;
+            row = -1;
 
             var minVal = double.MaxValue;
             var minIndex = -1;
 
-            var facs = TargetEquation;
-
-            for (int i = 0; i < facs.Factors.Length; i++)
+            for (var i = 0; i < CoefficientIndex; i++)
             {
-                if (facs[i].Factor > 0 && facs[i].Factor < minVal)
+                if (Matrix[TargetIndex][i] < minVal && Matrix[TargetIndex][i] > 0)
                 {
-                    minVal = facs[i].Factor;
+                    minVal = Matrix[TargetIndex][i];
                     minIndex = i;
                 }
             }
@@ -60,52 +67,78 @@ namespace SimplexAlgorithm
             if (minIndex == -1)
                 return false;
 
-            head = facs[minIndex].Variable;
+            head = minIndex;
 
             minVal = double.MaxValue;
 
-            for (var i = 0; i < Equations.Length - 1; i++)
+            for (var i = 0; i < TargetIndex; i++)
             {
-                var ration = Equations[i].Ration(head);
+                var ration = Math.Abs(Matrix[i][CoefficientIndex] / Matrix[i][head]);
 
                 if (ration < minVal)
                 {
                     minVal = ration;
-                    row = Equations[i].LeftTerm;
+                    row = i;
                 }
             }
 
             return true;
         }
 
+        public void Switch(int row, int head)
+        {
+            var pFact = 1 / Matrix[row][head];
+
+            for (var i = 0; i < Matrix[row].Length; i++)
+                Matrix[row][i] = (i == head ? -1 : Matrix[row][i]) * -pFact;
+
+
+            for (var i = 0; i < Matrix.Length; i++)
+            {
+                if (i == row)
+                    continue;
+
+                var rFact = Matrix[i][head];
+
+                //set new slack variable value
+                Matrix[i][head] *= pFact;
+
+                for (var j = 0; j < Matrix[i].Length; j++)
+                {
+                    if (j != head)
+                        Matrix[i][j] += rFact * Matrix[row][j];
+                }
+            }
+
+            //switch row/head variables
+            var rVar = RowVariables[row];
+            RowVariables[row] = HeadVariables[head];
+            HeadVariables[head] = rVar;
+
+        }
+
         public override string ToString()
         {
             var sb = new StringBuilder();
 
-            sb.Append(new string(' ', ColWidth));
+            sb.Append("\t");
 
-            var format = "{0," + ColWidth + "}";
+            for (var i = 0; i < HeadVariables.Length; i++)
+                sb.Append($"{HeadVariables[i]}\t");
 
-            foreach (var v in Equations[0].Factors)
+            sb.Append("c\n");
+
+            for (var i = 0; i < Matrix.Length; i++)
             {
-                sb.AppendFormat(format, v.Variable);
-            }
+                sb.Append((i == Matrix.Length - 1 ? TargetVariable.Name : RowVariables[i].Name) + "\t");
 
-            sb.AppendFormat(format, "c");
-
-            sb.AppendLine(null);
-
-            foreach (var eq in Equations.OrderBy(e => e.LeftTerm.Type))
-            {
-                sb.AppendFormat(format, eq.LeftTerm);
-                foreach (var val in eq.Factors)
+                for (var j = 0; j <= HeadVariables.Length; j++)
                 {
-                    sb.AppendFormat(format, val);
+                    sb.Append($"{Matrix[i][j]}\t");
                 }
-
-                sb.AppendFormat(format, eq.Coefficient);
-                sb.AppendLine(null);
+                sb.Append("\n");
             }
+
 
             return sb.ToString();
         }

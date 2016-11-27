@@ -25,21 +25,28 @@ namespace myLP
                 return;
             }
 
-            var solver = new Solver(filename);
-            var result = solver.Solve();
+            var csv = new CsvReader(filename);
 
-            switch (result)
+            var result = Solver.Solve(csv);
+
+            switch (result.Type)
             {
                 case Solver.ResultType.NoResults:
                     Console.WriteLine("No result found.");
                     break;
                 case Solver.ResultType.OneResult:
-                    Console.WriteLine("One result found.");
+                    Console.WriteLine("One result found:");
+                    foreach (var vals in result.Values)
+                    {
+                        Console.WriteLine(vals.Key.ToString(vals.Value));
+                    }
                     break;
                 case Solver.ResultType.InfinitResults:
                     Console.WriteLine("Infinit results found.");
                     break;
             }
+
+            Console.ReadKey();
         }
     }
 }

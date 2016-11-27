@@ -6,56 +6,67 @@ using System.Threading.Tasks;
 
 namespace SimplexAlgorithm
 {
-    public struct Variable
+    public class Variable
     {
-        public readonly int Index;
         public readonly VariableType Type;
+        public readonly string Name;
+        public readonly string Description;
+        public readonly string Unit;
 
-        public Variable(VariableType type, int index)
+        public Variable(VariableType type, string name, string description = null, string unit = null)
         {
             Type = type;
-            Index = index;
+            Name = name;
+            Description = description;
+            Unit = unit;
         }
 
-        public static Variable Slack(int index) => new Variable(VariableType.Slack, index);
-        public static Variable Problem (int index) => new Variable(VariableType.Problem, index);
-        public static Variable Target () => new Variable(VariableType.Target, 0);
+        public const string ProblemPrefix = "x";
+        public const string SlackPrefix = "y";
+        public const string TargetPrefix = "z";
 
-        public static bool operator ==(Variable v1, Variable v2) => v1.Type == v2.Type && (v1.Index == v2.Index || v1.Type == VariableType.Target);
+
+        public static Variable Problem(int i) => new Variable(VariableType.Problem, ProblemPrefix + i);
+        public static Variable Slack(int i) => new Variable(VariableType.Slack, SlackPrefix + i);
+        public static Variable Target() => new Variable(VariableType.Target, TargetPrefix);
+
+        public override string ToString() => $"{Name}";
+
+        public string ToString(double value)
+        {
+            return $"{Name} = {value}";
+        }
+        public static bool operator ==(Variable v1, Variable v2) => v1.Type == v2.Type && v1.Name == v2.Name;
+
         public static bool operator !=(Variable v1, Variable v2) => !(v1 == v2);
 
-        public bool Equals(Variable other)
-        {
-            return Index == other.Index && Type == other.Type;
-        }
+        protected bool Equals(Variable other) => this == other;
 
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
-            return obj is Variable && Equals((Variable)obj);
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Variable)obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return (Index * 397) ^ (int)Type;
+                var hashCode = (int)Type;
+                hashCode = (hashCode * 397) ^ (Name?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ (Description?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ (Unit?.GetHashCode() ?? 0);
+                return hashCode;
             }
-        }
-
-        public override string ToString()
-        {
-            if (Type == VariableType.Target)
-                return "z";
-
-            return (Type == VariableType.Problem ? "x" : "y") + Index;
         }
     }
 
     public enum VariableType
     {
-        Slack,
         Problem,
+        Slack,
         Target
     }
 }

@@ -9,59 +9,73 @@ namespace SimplexAlgorithmTests
     public class ExamplesTests
     {
         [TestMethod]
+        public void FarmerExample()
+        {
+            var reader = new CsvReader("Examples\\FarmerExample.csv");
+            var result = Solver.Solve(reader);
+
+            Assert.AreEqual(Solver.ResultType.OneResult, result.Type);
+        }
+
+        [TestMethod]
         public void BasicExample()
         {
-            var s = new Solver("Examples\\BasicExample.csv");
-            Assert.AreEqual(Solver.ResultType.OneResult, s.Solve());
+            var reader = new CsvReader("Examples\\BasicExample.csv");
+            var result = Solver.Solve(reader);
+
+            Assert.AreEqual(Solver.ResultType.OneResult, result.Type);
         }
 
         [TestMethod]
         public void InfiniteSolutions()
         {
-            var s = new Solver("Examples\\InfiniteSolutions.csv");
-            Assert.AreEqual(Solver.ResultType.InfinitResults, s.Solve());
+            var reader = new CsvReader("Examples\\InfiniteSolutions.csv");
+
+            var result = Solver.Solve(reader);
+            Assert.AreEqual(Solver.ResultType.InfinitResults, result.Type);
         }
 
         [TestMethod]
         public void NegSchlupf()
         {
-            var s = new Solver("Examples\\NegSchlupf.csv");
-            Assert.AreEqual(Solver.ResultType.OneResult, s.Solve());
+            var reader = new CsvReader("Examples\\NegSchlupf.csv");
+            var result = Solver.Solve(reader);
+            Assert.AreEqual(Solver.ResultType.OneResult, result.Type);
         }
 
         [TestMethod]
         public void NichtNegativitaet_1()
         {
-            var s = new Solver("Examples\\NichtNegativitaet_1.csv");
-            Assert.AreEqual(Solver.ResultType.OneResult, s.Solve());
+            var reader = new CsvReader("Examples\\NichtNegativitaet_1.csv");
+            var result = Solver.Solve(reader);
+            Assert.AreEqual(Solver.ResultType.OneResult, result.Type);
         }
 
         [TestMethod]
         public void NichtNegativitaet_2()
         {
-            var s = new Solver("Examples\\NichtNegativitaet_2.csv");
-            Assert.AreEqual(Solver.ResultType.OneResult, s.Solve());
+            var reader = new CsvReader("Examples\\NichtNegativitaet_2.csv");
+            var result = Solver.Solve(reader);
+            Assert.AreEqual(Solver.ResultType.OneResult, result.Type);
         }
 
         [TestMethod]
         public void ZweiSaefte()
         {
-            var s = new Solver("Examples\\ZweiSaefte.csv");
-            Assert.AreEqual(Solver.ResultType.OneResult, s.Solve());
+            var reader = new CsvReader("Examples\\ZweiSaefte.csv");
+            var result = Solver.Solve(reader);
+            Assert.AreEqual(Solver.ResultType.OneResult, result.Type);
         }
 
         [TestMethod]
         public void TrainExample()
         {
-            var s = new Solver("Examples\\TrainExample.csv");
-            s.Solve();
-            //var target = s.Equations.First(e => e.LeftTerm.Type == VariableType.Target);
+            var csv = new CsvReader("Examples\\TrainExample.csv");
+            var result = Solver.Solve(csv.HeadVariables, csv.RowVariables, csv.TargetVariable, csv.Matrix, csv.Optimization);
 
-            //invert target coefficient to transform it into a maximization problem
-            //Assert.AreEqual(-229, target.Coefficient);
+            var zVal = result.Values.Single(v => v.Key.Type == VariableType.Target).Value;
 
-            //Assert.AreEqual(Solver.ResultType.OneResult, s.Solve());
-            //Assert.AreEqual(191,s.ResultFactors.Where(f=>f.Variable == Variable.Target()).First().Factor);
+            Assert.AreEqual(191, zVal,0.1);
         }
     }
 }

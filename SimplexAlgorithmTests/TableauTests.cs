@@ -10,25 +10,59 @@ namespace SimplexAlgorithmTests
     public class TableauTests
     {
         [TestMethod()]
-        public void HandleInequalityOperator()
+        public void PrettyPrintTableau()
         {
-            var smeq = new Solver(GetStreamReader(@"1;1;
-max;3;0
-;
-<=;2;100")).Equations.First();
+            var x1 = Variable.Problem(1);
+            var x2 = Variable.Problem(2);
 
-            Assert.AreEqual(new Equation(Variable.Slack(1), new []
+            var y1 = Variable.Slack(1);
+            var z = Variable.Target();
+
+            var t = new Tableau(new[] { x1, x2 }, new[] { y1 }, z, new[]
             {
-                new VariableFactor(Variable.Problem(1), -2) 
-            },100  ), smeq);
+                new []{1d,2d,3d},
+                new [] {2d,0d,5d}
+            });
+
+            Assert.AreEqual("\tx1\tx2\tc\ny1\t1\t2\t3\t\nz\t2\t0\t5\t\n", t.ToString());
         }
 
-
-        private static StreamReader GetStreamReader(string content)
+        [TestMethod]
+        public void SwitchOverMinus1()
         {
-            var ms = new MemoryStream(Encoding.Default.GetBytes(content));
+            var t = new Tableau(new[]
+            {
+                new[] {-1d,-1d,40},
+                new[] {-40d,-120d,2400},
+                new[] {-7d,-12d,312},
+                new[] {100d,250d,0}
+            });
 
-            return new StreamReader(ms);
+            t.Switch(0, 0);
+            Assert.AreEqual("y1", t.HeadVariables[0].Name);
+            Assert.AreEqual(4000, t.Matrix[t.TargetIndex][t.CoefficientIndex]);
+
+        }
+
+        [TestMethod]
+        public void SwitchOverMinus5()
+        {
+            var t = new Tableau(new[]
+            {
+                new[] {-1d,-1d,40},
+                new[] {40d,-80d,800},
+                new[] {7d,-5d,32},
+                new[] {-100d,150d,4000}
+            });
+
+            t.Switch(2, 1);
+            Assert.AreEqual(7d / 5, t.Matrix[2][0], 0.01);
+            Assert.AreEqual(-1d / 5, t.Matrix[2][1], 0.01);
+            Assert.AreEqual(32d / 5, t.Matrix[2][2], 0.01);
+
+
+            Assert.AreEqual(4960, t.Matrix[t.TargetIndex][t.CoefficientIndex]);
+
         }
     }
 }
