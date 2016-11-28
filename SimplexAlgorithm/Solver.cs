@@ -18,12 +18,12 @@ namespace SimplexAlgorithm
 
         public static SolverResult Solve(Variable[] headVariables, Variable[] rowVariables, Variable targetVariable, double[][] matrix, Optimization optimization)
         {
-            if(optimization == Optimization.Minimize)
+            if (optimization == Optimization.Minimize)
                 InvertMinimizeToMaximizeMatrix(matrix);
 
-            var t = matrix.Select(r=>r[r.Length - 1]).Any(v => v < 0)
-                ? PreprocessMatrix(headVariables, rowVariables, matrix) 
-                : new Tableau(headVariables,rowVariables,targetVariable,matrix);
+            var t = matrix.Select(r => r[r.Length - 1]).Any(v => v < 0)
+                ? PreprocessMatrix(headVariables, rowVariables, matrix)
+                : new Tableau(headVariables, rowVariables, targetVariable, matrix);
 
 
             return InnerSolve(t, optimization);
@@ -39,7 +39,7 @@ namespace SimplexAlgorithm
             while (tableau.Pivot(out row, out head))
             {
                 if (--watchdog < 0)
-                    return new SolverResult(ResultType.InfinitResults, optimization,null,tableau);
+                    break;
                 tableau.Switch(row, head);
             }
 
@@ -47,7 +47,7 @@ namespace SimplexAlgorithm
 
             for (var i = 0; i < tableau.RowVariables.Length; i++)
             {
-                if (tableau.RowVariables[i].Type == VariableType.Problem)
+                if (tableau.RowVariables[i].Type == VariableType.Problem && tableau.RowVariables[i] != Variable.Problem(0))
                     values.Add(tableau.RowVariables[i], tableau.Matrix[i][tableau.CoefficientIndex]);
             }
 
@@ -73,7 +73,7 @@ namespace SimplexAlgorithm
             var targetIndex = matrix.Length - 1;
             var mainTarget = matrix[targetIndex];
             var mainVars = new Variable[headVariables.Length];
-            headVariables.CopyTo(mainVars,0);
+            headVariables.CopyTo(mainVars, 0);
 
             headVariables = new[] { helpVar }.Concat(headVariables).ToArray();
 
@@ -81,7 +81,7 @@ namespace SimplexAlgorithm
             {
                 var newRow = new double[headVariables.Length + 1];
                 newRow[0] = 1;
-                Array.Copy(matrix[i],0, newRow, 1, matrix[i].Length);
+                Array.Copy(matrix[i], 0, newRow, 1, matrix[i].Length);
                 matrix[i] = newRow;
             }
 
@@ -89,22 +89,23 @@ namespace SimplexAlgorithm
 
             matrix[targetIndex][0] = -1;
 
-            var tableau = new Tableau(headVariables,rowVariables,helpTarget, matrix);
+            var tableau = new Tableau(headVariables, rowVariables, helpTarget, matrix);
 
             for (var i = 0; i < tableau.TargetIndex; i++)
             {
-                if(tableau.Matrix[i][tableau.CoefficientIndex] < 0)
+                if (tableau.Matrix[i][tableau.CoefficientIndex] < 0)
                     tableau.Switch(i, 0);
             }
 
             var result = InnerSolve(tableau, Optimization.Maximize);
 
-            tableau.DropHeadVariable(helpVar);
+            if (tableau.HeadVariables.Contains(helpVar))
+                tableau.DropHeadVariable(helpVar);
 
             var target = tableau.Matrix[tableau.TargetIndex];
             for (var i = 0; i < tableau.TargetIndex; i++)
             {
-                if(tableau.RowVariables[i].Type != VariableType.Problem)
+                if (tableau.RowVariables[i].Type != VariableType.Problem)
                     continue;
 
                 var tIndex = -1;
@@ -134,7 +135,7 @@ namespace SimplexAlgorithm
                     target[j] += vVal;
 
                 }
-                target[tableau.CoefficientIndex] += tVal*tableau.Matrix[i][tableau.CoefficientIndex] + mainTarget[mainVars.Length];
+                target[tableau.CoefficientIndex] += tVal * tableau.Matrix[i][tableau.CoefficientIndex] + mainTarget[mainVars.Length];
             }
 
 
